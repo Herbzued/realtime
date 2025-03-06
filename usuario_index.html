@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuario - Rutas de Matamoros</title>
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; display: flex; flex-direction: column; height: 100vh; background-color: #f0f2f5; }
+
+        /* Encabezado */
+        header {
+            background: #004AAD;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Contenedor de botones */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .button-container button {
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .button-container button:hover {
+            background: #0056b3;
+            transform: scale(1.05);
+        }
+
+        /* Menú lateral */
+        #menu {
+            width: 250px;
+            background: #004AAD;
+            color: white;
+            padding: 15px;
+            overflow-y: auto;
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+        }
+        #menu h2 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            text-align: center;
+        }
+        .btn {
+            background: white;
+            color: #004AAD;
+            border: none;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 5px;
+            text-align: center;
+            font-weight: bold;
+            transition: 0.3s;
+            box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .btn:hover {
+            background: #002D6B;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Mapa */
+        #map { flex: 1; height: 100%; border-radius: 10px; }
+
+        /* Diseño responsivo */
+        @media (max-width: 768px) {
+            #menu {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Encabezado -->
+    <header>
+        <h1>🚌 Rutas de Matamoros</h1>
+        <div class="button-container">
+            <button onclick="window.location.href = 'tiempo_real.html';">En Tiempo Real</button>
+            <button onclick="window.location.href = 'horarios.html';">Horarios</button>
+        </div>
+    </header>
+
+    <!-- Contenedor principal -->
+    <div style="display: flex; flex: 1;">
+        <!-- Menú lateral -->
+        <div id="menu">
+            <h2>📌 Rutas Disponibles</h2>
+            <div id="listaRutas"></div>
+        </div>
+
+        <!-- Mapa -->
+        <div id="map"></div>
+    </div>
+
+    <!-- Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Inicializar el mapa
+        var map = L.map('map').setView([25.8797, -97.5046], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Cargar rutas guardadas desde localStorage
+        var rutas = JSON.parse(localStorage.getItem("rutasPeceras")) || [];
+        var rutasLayers = [];
+        var listaRutas = document.getElementById("listaRutas");
+
+        rutas.forEach((ruta, index) => {
+            var polyline = L.polyline(ruta.coordinates, { color: ruta.color, weight: 5 }).addTo(map);
+            polyline.bindPopup(ruta.name);
+            polyline.on('mouseover', function () { this.openPopup(); });
+
+            rutasLayers.push(polyline);
+
+            // Crear botón en el menú para cada ruta
+            var btnRuta = document.createElement("button");
+            btnRuta.className = "btn";
+            btnRuta.innerText = ruta.name;
+            btnRuta.onclick = function () {
+                map.fitBounds(polyline.getBounds());
+                polyline.openPopup();
+            };
+            listaRutas.appendChild(btnRuta);
+        });
+    </script>
+</body>
+</html>
